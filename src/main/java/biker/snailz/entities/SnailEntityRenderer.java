@@ -10,7 +10,7 @@ import net.minecraft.util.Identifier;
 public class SnailEntityRenderer extends MobEntityRenderer<SnailEntity, LivingEntityRenderState, SnailEntityModel> {
 
     public SnailEntityRenderer(EntityRendererFactory.Context context) {
-        super(context, new SnailEntityModel(context.getPart(SnailzClient.SNAILMODEL)), 0.5f);
+        super(context, new SnailEntityModel(context.getPart(SnailzClient.SNAILMODEL)), 0.2f);
     }
 
     @Override

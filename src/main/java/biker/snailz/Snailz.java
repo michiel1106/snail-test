@@ -21,7 +21,7 @@ public class Snailz implements ModInitializer {
 	public static final EntityType<SnailEntity> SNAIL = Registry.register(
 			Registries.ENTITY_TYPE,
 			Identifier.of("snailz", "bikersnail"),
-			EntityType.Builder.create(SnailEntity::new, SpawnGroup.CREATURE).dimensions(0.75f, 0.75f).build(RegistryKey.of(RegistryKeys.ENTITY_TYPE, Identifier.of(Snailz.MOD_ID, "bikersnail"))));
+			EntityType.Builder.create(SnailEntity::new, SpawnGroup.CREATURE).dimensions(0.35f, 0.35f).build(RegistryKey.of(RegistryKeys.ENTITY_TYPE, Identifier.of(Snailz.MOD_ID, "bikersnail"))));
 
 
 

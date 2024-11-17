@@ -5,6 +5,8 @@ import net.minecraft.client.render.entity.model.EntityModel;
 import net.minecraft.client.render.entity.state.LivingEntityRenderState;
 
 public class SnailEntityModel extends EntityModel<LivingEntityRenderState> {
+
+
     protected SnailEntityModel(ModelPart root) {
         super(root);
     }

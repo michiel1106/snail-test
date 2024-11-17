@@ -20,6 +20,9 @@
 		],
 		"fabric-datagen": [
 			"biker.snailz.SnailzDataGenerator"
+		],
+		"client": [
+			"biker.snailz.SnailzClient"
 		]
 	},
 	"mixins": [
