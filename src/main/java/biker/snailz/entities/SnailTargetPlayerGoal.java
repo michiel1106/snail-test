@@ -34,7 +34,7 @@ public class SnailTargetPlayerGoal extends Goal {
 
         // Move the snail towards the player
         double distance = this.snail.squaredDistanceTo(targetPlayer);
-        if (distance > 2.0D) { // Ignore very close targets
+        if (distance > 0.0D) { // Ignore very close targets
             double xDiff = targetPlayer.getX() - snail.getX();
             double yDiff = targetPlayer.getY() - snail.getY();
             double zDiff = targetPlayer.getZ() - snail.getZ();
@@ -42,7 +42,7 @@ public class SnailTargetPlayerGoal extends Goal {
             double distanceToTarget = MathHelper.sqrt((float) (xDiff * xDiff + yDiff * yDiff + zDiff * zDiff));
 
             // Normalize the movement vector
-            snail.getNavigation().startMovingTo(targetPlayer, 1.0);
+            snail.getNavigation().startMovingTo(targetPlayer, 0.2);
         }
     }
 }

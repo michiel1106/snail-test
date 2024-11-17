@@ -41,11 +41,6 @@ public class Snailz implements ModInitializer {
 		FabricDefaultAttributeRegistry.register(SNAIL, SnailEntity.createsnailattributes());
 
 
-		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
-			dispatcher.register(CommandManager.literal("target")
-					.then(CommandManager.argument("playerUsername", StringArgumentType.string())
-							.executes(Snailz::execute)));
-		});
 
 
 
@@ -53,35 +48,5 @@ public class Snailz implements ModInitializer {
 
 	}
 
-	private static int execute(CommandContext<ServerCommandSource> context) {
-		ServerCommandSource source = context.getSource();
-		ServerWorld world = source.getWorld();
-		String playerUsername = StringArgumentType.getString(context, "playerUsername");
 
-		// Find the player by username manually
-		PlayerEntity player = world.getServer().getPlayerManager().getPlayer(playerUsername);
-
-		UUID playeruserid = player.getUuid();
-
-		if (player == null) {
-			//source.sendError(Text.literal("Player not found: " + playerUsername));
-			return 0;
-		}
-
-		// Find the nearest SnailEntity to the command executor
-		SnailEntity nearestSnail = world.getClosestEntity(SnailEntity.class, null,
-                (LivingEntity) source.getEntity(), source.getPosition().x, source.getPosition().y, source.getPosition().z,
-				new Box(source.getPosition().subtract(10, 10, 10), source.getPosition().add(10, 10, 10)));
-
-		if (nearestSnail == null) {
-			source.sendError(Text.literal("No snail entities found nearby!"));
-			return 0;
-		}
-
-		// Set the snail's target to the specified player
-		nearestSnail.setTargetPlayer(playeruserid);
-		//source.sendFeedback(Text.literal("Snail is now targeting: " + player.getName().getString()), true);
-
-		return 1;
-	}
 }

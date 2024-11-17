@@ -20,7 +20,7 @@ import java.util.UUID;
 public class SnailEntity extends HostileEntity {
 
 
-    private UUID targetPlayerUUID;
+    private String TargetPlayerUsername;
 
     protected void initGoals() {
 
@@ -28,9 +28,10 @@ public class SnailEntity extends HostileEntity {
 
         this.goalSelector.add(1, new PowderSnowJumpGoal(this, this.getWorld()));
 
-        this.goalSelector.add(1, new SnailTargetPlayerGoal(this));
+        this.goalSelector.add(2, new SnailTargetPlayerGoal(this));
 
-        this.goalSelector.add(1, new MeleeAttackGoal(this, 0.5, false));
+        this.goalSelector.add(1, new MeleeAttackGoal(this, 1, false));
+
 
         //this.targetSelector.add(1, (new RevengeGoal(this, new Class[0])).setGroupRevenge(new Class[0]));
 
@@ -44,7 +45,7 @@ public class SnailEntity extends HostileEntity {
     }
 
     public static DefaultAttributeContainer.Builder createsnailattributes() {
-        return HostileEntity.createHostileAttributes().add(EntityAttributes.MAX_HEALTH, 50.0).add(EntityAttributes.MOVEMENT_SPEED, 0.15).add(EntityAttributes.ATTACK_DAMAGE, 1.0);
+        return HostileEntity.createHostileAttributes().add(EntityAttributes.MAX_HEALTH, 50.0).add(EntityAttributes.MOVEMENT_SPEED, 0.2).add(EntityAttributes.ATTACK_DAMAGE, 1.0);
     }
 
     @Override
@@ -57,9 +58,10 @@ public class SnailEntity extends HostileEntity {
         super.writeCustomDataToNbt(nbt);
 
 
-        if (targetPlayerUUID != null) {
-            nbt.putUuid("TargetPlayerUUID", targetPlayerUUID);
+        if (TargetPlayerUsername != null) {
+            nbt.putString("TargetPlayerUsername", TargetPlayerUsername);
         }
+        nbt.putString("TargetPlayerUsername", "615f256e-587e-407d-92c0-af02414eacea");
 
     }
 
@@ -67,19 +69,22 @@ public class SnailEntity extends HostileEntity {
     public void readCustomDataFromNbt(NbtCompound nbt) {
         super.readCustomDataFromNbt(nbt);
 
-        if (nbt.contains("TargetPlayerUUID")) {
-            targetPlayerUUID = nbt.getUuid("TargetPlayerUUID");
+        if (nbt.contains("TargetPlayerUsername")) {
+            UUID TargetPlayerUsername = (nbt.getUuid("TargetPlayerUsername"));
         }
     }
 
-    public void setTargetPlayer(UUID player) {
-        this.targetPlayerUUID = player;
+    public void setTargetPlayer(String player) {
+        this.TargetPlayerUsername = player;
         this.markEffectsDirty();  // Make sure the NBT gets saved.
     }
 
     public PlayerEntity getTargetPlayer() {
-        if (targetPlayerUUID != null) {
-            Entity entity = getWorld().getPlayerByUuid(targetPlayerUUID);
+        if (TargetPlayerUsername != null) {
+
+            UUID playeruuids = UUID.fromString(TargetPlayerUsername);
+
+            Entity entity = getWorld().getPlayerByUuid(playeruuids);
             if (entity instanceof PlayerEntity) {
                 return (PlayerEntity) entity;
             }
@@ -121,12 +126,19 @@ public class SnailEntity extends HostileEntity {
 
         super.mobTick(world);
 
-           // if (!getWorld().isClient) { // Ensure this is only executed server-side
-           //     PlayerEntity nearestPlayer = world.getClosestPlayer(this, 16); // 16 is the radius, adjust as needed
-           //     if (nearestPlayer != null) {
-           //         this.setTargetPlayer(nearestPlayer);
-           //     }
-           // }
+        //    if (!getWorld().isClient) { // Ensure this is only executed server-side
+        //        PlayerEntity nearestPlayer = world.getClosestPlayer(this, 16); // 16 is the radius, adjust as needed
+        //        if (nearestPlayer != null) {
+        //            String nearestplayeruuid = nearestPlayer.getUuidAsString();
+        //           System.out.println(nearestplayeruuid);
+        //       }
+
+
+        // System.out.println(nearestPlayer);
+               // if (nearestPlayer != null) {
+               //     this.setTargetPlayer(nearestPlayer);
+               // }
+            }
 
 
 
@@ -135,4 +147,4 @@ public class SnailEntity extends HostileEntity {
 
 
 
-}
+
