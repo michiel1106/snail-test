@@ -16,15 +16,10 @@ import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.math.Box;
+import net.minecraft.world.World;
 
-import java.util.UUID;
+import java.util.List;
 
 import static net.minecraft.server.command.CommandManager.literal;
 
@@ -36,7 +31,7 @@ public class Snailz implements ModInitializer {
 	public static final EntityType<SnailEntity> SNAIL = Registry.register(
 			Registries.ENTITY_TYPE,
 			Identifier.of("snailz", "bikersnail"),
-			EntityType.Builder.create(SnailEntity::new, SpawnGroup.CREATURE).dimensions(0.35f, 0.35f).build(RegistryKey.of(RegistryKeys.ENTITY_TYPE, Identifier.of(Snailz.MOD_ID, "bikersnail"))));
+			EntityType.Builder.create(SnailEntity::new, SpawnGroup.CREATURE).dimensions(0.55f, 0.55f).build(RegistryKey.of(RegistryKeys.ENTITY_TYPE, Identifier.of(Snailz.MOD_ID, "bikersnail"))));
 
 
 
@@ -46,13 +41,27 @@ public class Snailz implements ModInitializer {
 
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> dispatcher.register(literal("foo")
 				.executes(context -> {
-					// For versions below 1.19, replace "Text.literal" with "new LiteralText".
-					// For versions below 1.20, remode "() ->" directly.
-					ServerPlayerEntity whatever = context.getSource().getPlayer();
-					System.out.println(whatever);
+					World world = context.getSource().getWorld();
+					AStarPathFinder.Node start = new AStarPathFinder.Node(32, 70, 32);
+					AStarPathFinder.Node end = new AStarPathFinder.Node(10, 76, 90);
+
+					System.out.println("Starting pathfinding...");
+
+					// Find the path, passing the world to ensure walkability checks
+					List<AStarPathFinder.Node> path = AStarPathFinder.findPath(start, end, world);
+					System.out.println(path);
+
 
 					return 1;
 				})));
+
+
+
+
+		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
+			PathCommand.register(dispatcher);
+		});
+
 
 
 

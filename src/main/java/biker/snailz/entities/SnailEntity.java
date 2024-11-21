@@ -1,8 +1,11 @@
 package biker.snailz.entities;
 
+import biker.snailz.AStarPathFinder;
 import com.mojang.serialization.Dynamic;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.ShapeContext;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ai.brain.Brain;
@@ -14,19 +17,27 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.function.BooleanBiFunction;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.profiler.Profiler;
 import net.minecraft.util.profiler.Profilers;
+import net.minecraft.util.shape.VoxelShape;
+import net.minecraft.util.shape.VoxelShapes;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.World;
 
+import java.util.List;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 public class SnailEntity extends HostileEntity {
 
-    private World world;
-    private String TargetPlayer1;
 
+    //private World world;
+    private static final Predicate<Difficulty> DOOR_BREAK_DIFFICULTY_CHECKER = difficulty -> difficulty == Difficulty.HARD;
+    private final BreakDoorGoal breakDoorsGoal = new BreakDoorGoal(this, DOOR_BREAK_DIFFICULTY_CHECKER);
 
     protected void initGoals() {
 
@@ -34,9 +45,15 @@ public class SnailEntity extends HostileEntity {
 
         this.goalSelector.add(1, new PowderSnowJumpGoal(this, this.getWorld()));
 
-        this.goalSelector.add(1, new SnailTargetPlayerGoal(this));
+        this.goalSelector.add(1, new BreakDoorGoal(this, DOOR_BREAK_DIFFICULTY_CHECKER));
 
         this.goalSelector.add(2, new MeleeAttackGoal(this, 1, false));
+
+        this.goalSelector.add(2, new SnailTargetPlayerGoal(this));
+
+
+
+
 
 
         //this.targetSelector.add(1, (new RevengeGoal(this, new Class[0])).setGroupRevenge(new Class[0]));
@@ -47,14 +64,30 @@ public class SnailEntity extends HostileEntity {
 
 
 
-    public static final float WALKING_SPEED = 0.25f;
+    public static final float WALKING_SPEED = 0.2f;
 
     public SnailEntity(EntityType<? extends SnailEntity> entityType, World world) {
         super(entityType, world);
     }
 
+    @Override
+    public boolean isPushedByFluids() {
+        return false;
+    }
+
+
     public static DefaultAttributeContainer.Builder createsnailattributes() {
-        return HostileEntity.createHostileAttributes().add(EntityAttributes.MAX_HEALTH, 50.0).add(EntityAttributes.MOVEMENT_SPEED, 0.6).add(EntityAttributes.ATTACK_DAMAGE, 1.0);
+        return HostileEntity.createHostileAttributes()
+                .add(EntityAttributes.MAX_HEALTH, 50.0)
+                .add(EntityAttributes.MOVEMENT_SPEED, 0.6)
+                .add(EntityAttributes.ATTACK_DAMAGE, 1.0)
+                .add(EntityAttributes.STEP_HEIGHT, 4)
+                .add(EntityAttributes.BLOCK_BREAK_SPEED, 5)
+                .add(EntityAttributes.SAFE_FALL_DISTANCE, 1024);
+    }
+
+    public boolean canBreakDoors() {
+        return true;
     }
 
     @Override
@@ -67,8 +100,6 @@ public class SnailEntity extends HostileEntity {
     @Override
     public void writeCustomDataToNbt(NbtCompound nbt) {
         super.writeCustomDataToNbt(nbt);
-
-
 
         //nbt.putString("TargetPlayerUsername", TargetPlayerUsername);
 
@@ -209,7 +240,10 @@ public class SnailEntity extends HostileEntity {
                // if (nearestPlayer != null) {
                //     this.setTargetPlayer(nearestPlayer);
                // }
-            }
+
+
+
+    }
 
 
 
