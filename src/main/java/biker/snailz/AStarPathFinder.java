@@ -1,15 +1,18 @@
 package biker.snailz;
 
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 import java.util.*;
 
+import static net.minecraft.registry.tag.BlockTags.FLOWERS;
 
 
-
-    public class AStarPathFinder {
+public class AStarPathFinder {
 
         public static class Node implements Comparable<Node> {
 
@@ -47,71 +50,78 @@ import java.util.*;
             }
         }
 
-        /**
-         * Find the optimal path using the A* algorithm.
-         *
-         * @param start Starting node
-         * @param end   Ending node
-         * @param world The world in which pathfinding will be done
-         * @return List of nodes representing the optimal path, or an empty list if no path is found
-         */
         public static List<Node> findPath(Node start, Node end, World world) {
-            System.out.println("Starting pathfinding...");
+            System.out.println("A* Starting pathfinding...");
 
-            // Clear any previous states
             PriorityQueue<Node> openSet = new PriorityQueue<>();
             Set<Node> closedSet = new HashSet<>();
+            Map<Node, Double> gCostMap = new HashMap<>();
+            Map<Node, Node> cameFrom = new HashMap<>();
 
             start.gCost = 0;
             start.hCost = heuristic(start, end);
             openSet.add(start);
+            gCostMap.put(start, 0.0);
 
-            int iterations = 0;  // Add an iteration counter to avoid infinite loops
-
+            int iterations = 0;
             while (!openSet.isEmpty()) {
                 Node current = openSet.poll();
 
-                // Debug prints
-                System.out.println("Current node: " + current.x + ", " + current.y + ", " + current.z);
-                System.out.println("Open set size: " + openSet.size());
-                iterations++;
-                if (iterations > 1000) {  // Add a limit to iterations to prevent infinite loops
-                    System.out.println("Too many iterations, breaking out!");
-                    break;
-                }
-
-                // If we've reached the destination node, reconstruct the path
-                if (current.equals(end)) {
-                    System.out.println("Destination reached!");
-                    return reconstructPath(current);
-                }
-
-                closedSet.add(current);
-
-                // Get neighbors and process them
-                for (Node neighbor : getNeighbors(current, world)) {
-                    BlockPos neighborPos = new BlockPos(neighbor.x, neighbor.y, neighbor.z);
-                    if (!world.getBlockState(neighborPos).isAir()) {
-                        continue;  // Skip non-walkable blocks
+                try {
+                    if (current.equals(end)) {
+                        System.out.println("A* Destination reached!");
+                        return reconstructPath(cameFrom, current);
                     }
 
-                    double tentativeGCost = current.gCost + distance(current, neighbor);
-                    if (!openSet.contains(neighbor) || tentativeGCost < neighbor.gCost) {
-                        neighbor.gCost = tentativeGCost;
-                        neighbor.hCost = heuristic(neighbor, end);
-                        neighbor.parent = current;
+                    closedSet.add(current);
 
-                        if (!openSet.contains(neighbor)) {
-                            openSet.add(neighbor);
+                    // Log current node being processed
+                    //System.out.println("Processing node: (" + current.x + ", " + current.y + ", " + current.z + ")");
+
+                    for (Node neighbor : getNeighbors(current, world)) {
+                        try {
+                            if (closedSet.contains(neighbor)) continue;
+
+                            double tentativeGCost = gCostMap.get(current) + distance(current, neighbor);
+                            if (!gCostMap.containsKey(neighbor) || tentativeGCost < gCostMap.get(neighbor)) {
+                                gCostMap.put(neighbor, tentativeGCost);
+                                neighbor.hCost = heuristic(neighbor, end);
+                                cameFrom.put(neighbor, current);
+
+                                if (!openSet.contains(neighbor)) {
+                                    openSet.add(neighbor);
+                                } else {
+                                    openSet.remove(neighbor);
+                                    openSet.add(neighbor); // Update priority
+                                }
+                            }
+                        } catch (Exception e) {
+                            //System.err.println("Error processing neighbor (" + neighbor.x + ", " + neighbor.y + ", " + neighbor.z + ")");
+                            //e.printStackTrace();
                         }
                     }
+
+                    iterations++;
+                    if (iterations % 50000 == 0) {
+                        System.out.println(iterations + " iterations completed. A*");
+                    }
+
+                    if (iterations > 650000) {
+                        System.out.println("A* Too many iterations, breaking out!");
+                        break;
+                    }
+
+                } catch (Exception e) {
+                    System.err.println("A* Error processing node (" + current.x + ", " + current.y + ", " + current.z + ")");
+                    e.printStackTrace();
+                    break; // Exit to prevent infinite looping or further errors
                 }
             }
 
-            System.out.println("No path found!");
-            return Collections.emptyList();  // Return empty list if no path is found
+            //System.out.println("No path found!");
+            return Collections.emptyList();
         }
-        // Get all valid neighbors for a node
+
         private static List<Node> getNeighbors(Node node, World world) {
             List<Node> neighbors = new ArrayList<>();
             int[][] directions = {
@@ -124,40 +134,64 @@ import java.util.*;
                 int nz = node.z + dir[2];
 
                 BlockPos pos = new BlockPos(nx, ny, nz);
-                if (isWalkable(pos, world)) {
-                    neighbors.add(new Node(nx, ny, nz));
+                try {
+                    if (isWalkable(pos, world)) {
+                        neighbors.add(new Node(nx, ny, nz));
+                    } else {
+                        //System.out.println("Non-walkable position: (" + nx + ", " + ny + ", " + nz + ")");
+                    }
+                } catch (Exception e) {
+                    System.err.println("A* Error determining walkability for position: (" + nx + ", " + ny + ", " + nz + ")");
+                    e.printStackTrace();
                 }
             }
             return neighbors;
         }
-
-        // Heuristic function (Manhattan distance)
         private static double heuristic(Node a, Node b) {
-            return Math.abs(a.x - b.x) + Math.abs(a.y - b.y) + Math.abs(a.z - b.z);
+            int dx = Math.abs(a.x - b.x); // Difference in x
+            int dz = Math.abs(a.z - b.z); // Difference in z
+            int dy = a.y - b.y; // Vertical difference (not absolute to differentiate up/down)
+
+            // Penalize upward movement (dy > 0), encourage downward (dy < 0)
+            double verticalPenalty = dy > 0 ? dy * 1.5 : dy * 0.5;
+
+            return dx + dz + Math.abs(dy) + verticalPenalty;
+
+
         }
 
-        // Distance between two nodes (1.0 for adjacent nodes)
         private static double distance(Node a, Node b) {
             return 1.0;
         }
 
-        // Reconstruct the path from the end node to the start node
-        private static List<Node> reconstructPath(Node end) {
+        private static List<Node> reconstructPath(Map<Node, Node> cameFrom, Node current) {
             List<Node> path = new ArrayList<>();
-            Node current = end;
             while (current != null) {
                 path.add(current);
-                current = current.parent;
+                current = cameFrom.get(current);
             }
             Collections.reverse(path);
             return path;
         }
 
-        // Check if a block at a given position is walkable (e.g., air)
         private static boolean isWalkable(BlockPos pos, World world) {
+            BlockPos below = pos.down();        // Block directly below
+            BlockPos twoBelow = below.down();  // Block two blocks below
+
+            // Check if there is a solid block directly under or two blocks under
+            boolean hasSupport = isSolidBlock(below, world) || isSolidBlock(twoBelow, world);
+
+            // Check if the position itself is walkable
             BlockState state = world.getBlockState(pos);
-            return state.isAir();  // You can expand this check with more block types that are walkable.
+            boolean isEmptyOrPassable = state.isAir() || state.isReplaceable() || state.isOf(Blocks.TALL_GRASS) || state.isOf(Blocks.SHORT_GRASS) || state.isOf(Blocks.CORNFLOWER) || state.isOf(Blocks.DANDELION) || state.isOf(Blocks.POPPY);
+
+            // Node is walkable if it has support below and the position itself is passable
+            return hasSupport && isEmptyOrPassable;
+        }
+
+        private static boolean isSolidBlock(BlockPos pos, World world) {
+            BlockState state = world.getBlockState(pos);
+            return state.isSolidBlock(world, pos) || state.isIn(BlockTags.LEAVES) || !state.isOpaque(); // Ensures the block can support an entity
         }
     }
-
 
