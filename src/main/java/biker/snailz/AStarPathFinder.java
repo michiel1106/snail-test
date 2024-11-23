@@ -106,7 +106,7 @@ public class AStarPathFinder {
                         System.out.println(iterations + " iterations completed. A*");
                     }
 
-                    if (iterations > 650000) {
+                    if (iterations > 25000) {
                         System.out.println("A* Too many iterations, breaking out!");
                         break;
                     }

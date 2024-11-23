@@ -32,86 +32,91 @@ public class SnailTargetPlayerGoal extends Goal {
 
     @Override
     public void start() {
-        System.out.println("executed start");
-        if (path1 != null) {
-            path1.clear();
-        }
+        System.out.println("Snail's current position: " + snail.getPos());
+        System.out.println("Path target: " + pathCoordinates.get(pathIndex));
+        System.out.println("Player's position: " + targetPlayer);
+
+
+        System.out.println("Executing path calculation...");
         pathCoordinates.clear();
-
-
         pathIndex = 0;
 
-        // Initialize start and end nodes
+        // Define start and end nodes for pathfinding
         AStarPathFinder.Node start = new AStarPathFinder.Node(
                 (int) snail.getX(),
                 (int) snail.getY(),
                 (int) snail.getZ()
         );
-
         AStarPathFinder.Node end = new AStarPathFinder.Node(
-                (int) targetPlayer.getX(),
-                (int) targetPlayer.getY(),
-                (int) targetPlayer.getZ()
+                (int) Math.floor(targetPlayer.getX()),
+                (int) Math.floor(targetPlayer.getY()),
+                (int) Math.floor(targetPlayer.getZ())
         );
 
-        // Find the path
-        List<AStarPathFinder.Node> path1 = AStarPathFinder.findPath(start, end, snail.getWorld());
-        System.out.println(path1);
-        if (path1 == null || path1.isEmpty()) {
+        System.out.println("Pathfinder start: " + start + ", end: " + end);
+
+        // Generate the path
+        List<AStarPathFinder.Node> path = AStarPathFinder.findPath(start, end, snail.getWorld());
+        if (path == null || path.isEmpty()) {
             System.out.println("No path found!");
             return;
         }
 
         // Convert path to BlockPos
-        pathCoordinates = path1.stream()
+        pathCoordinates = path.stream()
                 .map(node -> new BlockPos(node.x, node.y, node.z))
                 .collect(Collectors.toList());
+
+        System.out.println("Generated path: " + pathCoordinates);
     }
 
     @Override
     public void tick() {
-        targetPlayer = snail.getTargetPlayer(); // Dynamically update player position
+        targetPlayer = snail.getTargetPlayer();
         if (targetPlayer == null) return;
 
-        // Check if path needs recalculating
-        if (pathCoordinates.isEmpty() || pathIndex >= pathCoordinates.size()) {
-            System.out.println("pathindex" + pathIndex);
-            System.out.println("path coords size" + pathCoordinates.size());
-            System.out.println("doin pathcoordinatesempty stuff! snail position. X: " + snail.getX() + " Y: " + snail.getY() + " Z: " + snail.getZ() + "and target/player position: " + "  X: " + targetPlayer.getX() + "  Y: " + targetPlayer.getY() + "  Z: " + targetPlayer.getZ() + "or other player coords: " + "  X: " + targetPlayer.x + "  Y: " + targetPlayer.y + "  Z: " + targetPlayer.z);
-            start(); // Recalculate the path
+        // Ensure the player's target block is correctly defined
+        BlockPos targetBlock = new BlockPos(
+                (int) Math.floor(targetPlayer.getX()),
+                (int) Math.floor(targetPlayer.getY()),
+                (int) Math.floor(targetPlayer.getZ())
+        );
+
+        // Recalculate path if needed
+        if (pathCoordinates.isEmpty() || pathIndex >= pathCoordinates.size() ||
+                !pathCoordinates.get(pathCoordinates.size() - 1).equals(targetBlock)) {
+            System.out.println("Recalculating path to target block: " + targetBlock);
+            start(); // Recalculate path
         }
 
-        // Continue along the path
+        // Ensure pathCoordinates is not empty before accessing
         if (!pathCoordinates.isEmpty() && pathIndex < pathCoordinates.size()) {
             BlockPos currentTarget = pathCoordinates.get(pathIndex);
             Vec3d snailPos = snail.getPos();
 
-            // Check if close to current target
-            if (snailPos.isInRange(new Vec3d(currentTarget.getX(), currentTarget.getY(), currentTarget.getZ()), 1.5)) {
-                pathIndex++; // Move to next waypoint
+            // Log movement details for debugging
+            System.out.println("Snail at: " + snailPos + ", moving to: " + currentTarget);
+
+            // Check if the snail is close enough to the current target block
+            if (snailPos.isInRange(new Vec3d(
+                    currentTarget.getX() + 0.5,
+                    currentTarget.getY(),
+                    currentTarget.getZ() + 0.5
+            ), 1.0)) {
+                pathIndex++; // Progress to the next waypoint
             } else {
-                // Move towards the target
+                // Move toward the current target block
                 snail.getNavigation().startMovingTo(
-                        currentTarget.getX() + 0.5, // Center the target position
+                        currentTarget.getX() + 0.5,
                         currentTarget.getY(),
                         currentTarget.getZ() + 0.5,
                         SnailEntity.WALKING_SPEED
                 );
             }
-
-
+        } else {
+            System.out.println("No valid path to follow!");
         }
-
-
-        if (Math.floor(targetPlayer.z) == Math.floor(snail.getZ()) && Math.floor(targetPlayer.x) == Math.floor(snail.getX()) && Math.floor(targetPlayer.y) == Math.floor(snail.getY()) ) {
-
-            System.out.println("destination reached! snail position: " + snail.getX() + snail.getY() + snail.getZ() + "and target/player position: " + targetPlayer.getX() + targetPlayer.getY() + targetPlayer.getZ() + "or player coords: " + targetPlayer.x + targetPlayer.y + targetPlayer.z);
-            start();
-        }
-
-
     }
-
 
   //  @Override
   //  public boolean shouldContinue() {
