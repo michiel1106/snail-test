@@ -153,7 +153,7 @@ public class AStarPathFinder {
             int dy = a.y - b.y; // Vertical difference (not absolute to differentiate up/down)
 
             // Penalize upward movement (dy > 0), encourage downward (dy < 0)
-            double verticalPenalty = dy > 0 ? dy * 1.5 : dy * 0.5;
+            double verticalPenalty = dy > 0 ? dy * 1 : dy * 1.5;
 
             return dx + dz + Math.abs(dy) + verticalPenalty;
 
@@ -176,10 +176,13 @@ public class AStarPathFinder {
 
         private static boolean isWalkable(BlockPos pos, World world) {
             BlockPos below = pos.down();        // Block directly below
-            BlockPos twoBelow = below.down();  // Block two blocks below
+            BlockPos twoBelow = below.down(); // Block two blocks below
+            BlockPos threeBelow = twoBelow.down();
+            BlockPos fourBelow = threeBelow.down();
+            BlockPos fiveBelow = fourBelow.down();
 
             // Check if there is a solid block directly under or two blocks under
-            boolean hasSupport = isSolidBlock(below, world) || isSolidBlock(twoBelow, world);
+            boolean hasSupport = isSolidBlock(below, world) || isSolidBlock(twoBelow, world) || isSolidBlock(threeBelow, world) || isSolidBlock(fourBelow, world) || isSolidBlock(fiveBelow, world);
 
             // Check if the position itself is walkable
             BlockState state = world.getBlockState(pos);
