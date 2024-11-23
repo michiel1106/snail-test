@@ -191,7 +191,7 @@ public class AStarPathFinder {
 
         private static boolean isSolidBlock(BlockPos pos, World world) {
             BlockState state = world.getBlockState(pos);
-            return state.isSolidBlock(world, pos) || state.isIn(BlockTags.LEAVES) || !state.isOpaque(); // Ensures the block can support an entity
+            return !state.isIn(BlockTags.AIR);  // Ensures the block can support an entity
         }
     }
 
