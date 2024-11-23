@@ -69,7 +69,7 @@ public class AStarPathFinder {
 
                 try {
                     if (current.equals(end)) {
-                        System.out.println("A* Destination reached!");
+                        System.out.println("A* Destination reached!" + "it took " + iterations + "iterations");
                         return reconstructPath(cameFrom, current);
                     }
 

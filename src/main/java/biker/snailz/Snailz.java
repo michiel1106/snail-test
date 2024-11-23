@@ -44,9 +44,9 @@ public class Snailz implements ModInitializer {
 
 
 
-	//	CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
-	//		PathCommand.register(dispatcher, registryAccess);
-	//	});
+		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
+			PathCommand.register(dispatcher, registryAccess);
+		});
 
 
 
