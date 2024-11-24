@@ -162,7 +162,7 @@ public class SnailEntity extends HostileEntity {
                 Entity entity = this.getWorld().getPlayerByUuid(playerUUID);
 
                 if (entity instanceof PlayerEntity player) {
-                    return player.getPos();
+                    return coordsfloor(player.getPos());
                 }
             } catch (IllegalArgumentException e) {
                 //System.err.println("Invalid UUID format: " + TargetPlayerUsername);
@@ -172,7 +172,14 @@ public class SnailEntity extends HostileEntity {
         return null;
     }
 
+    public Vec3d coordsfloor(Vec3d vec3d) {
+        double floorx = Math.floor(vec3d.x);
+        double floory = Math.floor(vec3d.y);
+        double floorz = Math.floor(vec3d.z);
 
+
+        return new Vec3d(floorx, floory, floorz);
+    }
 
 
 
@@ -234,6 +241,8 @@ public class SnailEntity extends HostileEntity {
 
 
     }
+
+
 
 
 
