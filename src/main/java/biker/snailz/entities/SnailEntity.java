@@ -12,6 +12,7 @@ import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.mob.HostileEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.profiler.Profiler;
@@ -19,6 +20,7 @@ import net.minecraft.util.profiler.Profilers;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.World;
 
+import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Predicate;
 
@@ -131,6 +133,9 @@ public class SnailEntity extends HostileEntity {
         this.markEffectsDirty(); // Ensure the NBT data is marked for saving
     }
 
+
+
+
     public void updateTargetFromNbt() {
         if (this.TargetPlayerUsername != null) {
             try {
@@ -163,6 +168,23 @@ public class SnailEntity extends HostileEntity {
 
                 if (entity instanceof PlayerEntity player) {
                     return coordsfloor(player.getPos());
+                }
+            } catch (IllegalArgumentException e) {
+                //System.err.println("Invalid UUID format: " + TargetPlayerUsername);
+            }
+        }
+
+        return null;
+    }
+
+    public Vec3d getTargetPlayer2() {
+        if (this.TargetPlayerUsername != null) {
+            try {
+                UUID playerUUID = UUID.fromString(TargetPlayerUsername);
+                Entity entity = this.getWorld().getPlayerByUuid(playerUUID);
+
+                if (entity instanceof PlayerEntity player) {
+                    return player.getPos();
                 }
             } catch (IllegalArgumentException e) {
                 //System.err.println("Invalid UUID format: " + TargetPlayerUsername);
@@ -219,35 +241,18 @@ public class SnailEntity extends HostileEntity {
         updateTargetFromNbt();
         super.mobTick(world);
 
-        //PlayerEntity nearestPlayer = world.getClosestPlayer(this, 16);
-        //if (nearestPlayer != null) {
-        //    this.setTargetPlayer(nearestPlayer.getUuidAsString());
-        //}
-
-
-        //    if (!getWorld().isClient) { // Ensure this is only executed server-side
-        //        PlayerEntity nearestPlayer = world.getClosestPlayer(this, 16); // 16 is the radius, adjust as needed
-        //        if (nearestPlayer != null) {
-        //            String nearestplayeruuid = nearestPlayer.getUuidAsString();
-        //           System.out.println(nearestplayeruuid);
-        //       }
-
-
-        // System.out.println(nearestPlayer);
-               // if (nearestPlayer != null) {
-               //     this.setTargetPlayer(nearestPlayer);
-               // }
-
-
+        if (getTargetPlayer() != null) {
+            double squareddistance = this.squaredDistanceTo(getTargetPlayer().x, getTargetPlayer().y, getTargetPlayer().z);
+            if (squareddistance <= 1.1) {
+                MinecraftServer serverWorld = this.getServer();
+                UUID playerUUID = UUID.fromString(TargetPlayerUsername);
+                assert serverWorld != null;
+                Objects.requireNonNull(Objects.requireNonNull(getServer()).getPlayerManager().getPlayer(playerUUID)).kill(serverWorld.getOverworld());
+            }
+        }
 
     }
-
-
-
-
-
-    }
-
+}
 
 
 
