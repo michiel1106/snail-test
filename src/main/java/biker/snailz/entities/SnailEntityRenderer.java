@@ -4,23 +4,26 @@ import biker.snailz.Snailz;
 import biker.snailz.SnailzClient;
 import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.client.render.entity.MobEntityRenderer;
+import net.minecraft.client.render.entity.model.EntityModel;
 import net.minecraft.client.render.entity.state.LivingEntityRenderState;
 import net.minecraft.util.Identifier;
 
-public class SnailEntityRenderer extends MobEntityRenderer<SnailEntity, LivingEntityRenderState, SnailEntityModel> {
+public class SnailEntityRenderer<T extends SnailEntity> extends MobEntityRenderer<SnailEntity, SnailEntityRenderState, SnailEntityModel<SnailEntity>> {
 
     public SnailEntityRenderer(EntityRendererFactory.Context context) {
         super(context, new SnailEntityModel(context.getPart(SnailzClient.SNAILMODEL)), 0.2f);
     }
+    private final EntityModel normalModel = this.getModel();
 
     @Override
-    public LivingEntityRenderState createRenderState() {
-        return new LivingEntityRenderState();
+    public SnailEntityRenderState createRenderState() {
+        return new SnailEntityRenderState();
     }
 
 
     @Override
-    public Identifier getTexture(LivingEntityRenderState state) {
+    public Identifier getTexture(SnailEntityRenderState state) {
         return Identifier.of(Snailz.MOD_ID, "textures/entity/snails/snail.png");
     }
+
 }

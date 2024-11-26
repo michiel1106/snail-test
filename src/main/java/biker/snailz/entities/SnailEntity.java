@@ -3,6 +3,7 @@ package biker.snailz.entities;
 import com.mojang.serialization.Dynamic;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.entity.AnimationState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ai.brain.Brain;
@@ -25,7 +26,30 @@ import java.util.UUID;
 import java.util.function.Predicate;
 
 public class SnailEntity extends HostileEntity {
+    public final AnimationState idleAnimationState = new AnimationState();
+    private int idleAnimationTimeout = 0;
 
+
+
+    @Override
+    public void tick() {
+        super.tick();
+
+        if(this.getWorld().isClient()) {
+            setupAnimationStates();
+        }
+
+    }
+
+
+    private void setupAnimationStates() {
+        if (this.idleAnimationTimeout <= 0) {
+            this.idleAnimationTimeout = this.random.nextInt(40) + 80;
+            this.idleAnimationState.start(this.age);
+        } else {
+            --this.idleAnimationTimeout;
+        }
+    }
 
     //private World world;
     private static final Predicate<Difficulty> DOOR_BREAK_DIFFICULTY_CHECKER = difficulty -> difficulty == Difficulty.HARD;
@@ -52,6 +76,8 @@ public class SnailEntity extends HostileEntity {
 
         //this.targetSelector.add(2, new ActiveTargetGoal(this, PlayerEntity.class, true));
     }
+
+
 
 
 
@@ -226,6 +252,8 @@ public class SnailEntity extends HostileEntity {
 
     @Override
     protected void mobTick(ServerWorld world) {
+
+
         Profiler profiler = Profilers.get();
         profiler.push("snailBrain");
 
