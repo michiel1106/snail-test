@@ -26,4 +26,9 @@ public class SnailEntityRenderer<T extends SnailEntity> extends MobEntityRendere
         return Identifier.of(Snailz.MOD_ID, "textures/entity/snails/snail.png");
     }
 
+//    public void updateRenderState(SnailEntity snailentity, SnailEntityRenderState snailEntityRenderState, float f) {
+//        super.updateRenderState(snailentity, snailEntityRenderState, f);
+//        snailEntityRenderState.idleAnimationState.copyFrom(SnailEntity.MO);
+//    }
+
 }

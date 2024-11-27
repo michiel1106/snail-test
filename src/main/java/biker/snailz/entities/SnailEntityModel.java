@@ -35,8 +35,8 @@ public class SnailEntityModel<T extends SnailEntity> extends EntityModel<SnailEn
 
 
         //this.animate(SnailEntityRenderState., SnailEntityModelAnimation.movement, SnailEntityRenderState, 1f);
+        //this.animate(SnailEntityModelAnimation.movement);
         this.animate(SnailEntityModelAnimation.movement);
-        this.
         //this.animateWalking(SnailEntityModelAnimation.movement, snailEntityRenderState.limbFrequency, snailEntityRenderState.limbAmplitudeMultiplier, 1, 2);
 
 
