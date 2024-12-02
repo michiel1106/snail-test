@@ -15,6 +15,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.profiler.Profiler;
 import net.minecraft.util.profiler.Profilers;
@@ -270,7 +271,8 @@ public class SnailEntity extends HostileEntity {
         super.mobTick(world);
 
         if (getTargetPlayer() != null) {
-            double squareddistance = this.squaredDistanceTo(getTargetPlayer().x, getTargetPlayer().y, getTargetPlayer().z);
+            //double squareddistance = this.squaredDistanceTo(getTargetPlayer().x, getTargetPlayer().y, getTargetPlayer().z);
+            double squareddistance = distanceTo();
             if (squareddistance <= 1.1) {
                 MinecraftServer serverWorld = this.getServer();
                 UUID playerUUID = UUID.fromString(TargetPlayerUsername);
@@ -279,6 +281,13 @@ public class SnailEntity extends HostileEntity {
             }
         }
 
+    }
+
+    public float distanceTo() {
+        float f = (float)(this.getX() - getTargetPlayer2().getX());
+        float g = (float)(this.getY() - getTargetPlayer2().getY());
+        float h = (float)(this.getZ() - getTargetPlayer2().getZ());
+        return MathHelper.sqrt(f * f + g * g + h * h);
     }
 }
 

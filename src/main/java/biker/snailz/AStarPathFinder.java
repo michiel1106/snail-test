@@ -51,7 +51,7 @@ public class AStarPathFinder {
         }
 
         public static List<Node> findPath(Node start, Node end, World world) {
-            System.out.println("A* Starting pathfinding...");
+            //System.out.println("A* Starting pathfinding...");
 
             PriorityQueue<Node> openSet = new PriorityQueue<>();
             Set<Node> closedSet = new HashSet<>();
@@ -69,7 +69,7 @@ public class AStarPathFinder {
 
                 try {
                     if (current.equals(end)) {
-                        System.out.println("A* Destination reached!" + "it took " + iterations + "iterations");
+                        //System.out.println("A* Destination reached!" + "it took " + iterations + "iterations");
                         return reconstructPath(cameFrom, current);
                     }
 
@@ -103,16 +103,16 @@ public class AStarPathFinder {
 
                     iterations++;
                     if (iterations % 50000 == 0) {
-                        System.out.println(iterations + " iterations completed. A*");
+                        //System.out.println(iterations + " iterations completed. A*");
                     }
 
                     if (iterations > 25000) {
-                        System.out.println("A* Too many iterations, breaking out!");
+                        //System.out.println("A* Too many iterations, breaking out!");
                         break;
                     }
 
                 } catch (Exception e) {
-                    System.err.println("A* Error processing node (" + current.x + ", " + current.y + ", " + current.z + ")");
+                    //System.err.println("A* Error processing node (" + current.x + ", " + current.y + ", " + current.z + ")");
                     e.printStackTrace();
                     break; // Exit to prevent infinite looping or further errors
                 }
@@ -141,7 +141,7 @@ public class AStarPathFinder {
                         //System.out.println("Non-walkable position: (" + nx + ", " + ny + ", " + nz + ")");
                     }
                 } catch (Exception e) {
-                    System.err.println("A* Error determining walkability for position: (" + nx + ", " + ny + ", " + nz + ")");
+                    //System.err.println("A* Error determining walkability for position: (" + nx + ", " + ny + ", " + nz + ")");
                     e.printStackTrace();
                 }
             }
@@ -177,16 +177,13 @@ public class AStarPathFinder {
         private static boolean isWalkable(BlockPos pos, World world) {
             BlockPos below = pos.down();        // Block directly below
             BlockPos twoBelow = below.down(); // Block two blocks below
-            BlockPos threeBelow = twoBelow.down();
-            BlockPos fourBelow = threeBelow.down();
-            BlockPos fiveBelow = fourBelow.down();
 
             // Check if there is a solid block directly under or two blocks under
-            boolean hasSupport = isSolidBlock(below, world) || isSolidBlock(twoBelow, world) || isSolidBlock(threeBelow, world) || isSolidBlock(fourBelow, world) || isSolidBlock(fiveBelow, world);
+            boolean hasSupport = isSolidBlock(below, world) || isSolidBlock(twoBelow, world);
 
             // Check if the position itself is walkable
             BlockState state = world.getBlockState(pos);
-            boolean isEmptyOrPassable = state.isAir() || state.isReplaceable() || state.isOf(Blocks.TALL_GRASS) || state.isOf(Blocks.SHORT_GRASS) || state.isOf(Blocks.CORNFLOWER) || state.isOf(Blocks.DANDELION) || state.isOf(Blocks.POPPY);
+            boolean isEmptyOrPassable = state.isAir() || state.isReplaceable() || state.isOf(Blocks.TALL_GRASS) || state.isOf(Blocks.SHORT_GRASS) || state.isOf(Blocks.CORNFLOWER) || state.isOf(Blocks.DANDELION) || state.isOf(Blocks.POPPY) || state.isOf(Blocks.WATER) || state.isOf(Blocks.LAVA);
 
             // Node is walkable if it has support below and the position itself is passable
             return hasSupport && isEmptyOrPassable;

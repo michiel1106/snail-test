@@ -34,6 +34,7 @@ public class SnailBrain {
         brain.setCoreActivities(ImmutableSet.of(Activity.CORE));
         brain.setDefaultActivity(Activity.IDLE);
         brain.resetPossibleActivities();
+
         return brain;
     }
 
