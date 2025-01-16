@@ -1,5 +1,6 @@
 package biker.snailz.entities;
 
+
 import biker.snailz.AStarPathFinder;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.registry.tag.BlockTags;
@@ -76,25 +77,11 @@ public class SnailTargetPlayerGoal extends Goal {
     @Override
     public void tick() {
 
+
         double distance = distanceTo();
-        if (distance >= 55) {
-           teleport();
-        }
 
 
-        boolean var1 = !snail.getWorld().getBlockState(snail.getBlockPos().down()).isIn(BlockTags.AIR);
-        boolean var2 = !snail.getWorld().getBlockState(snail.getBlockPos().up()).isIn(BlockTags.AIR);
-        boolean var3 = !snail.getWorld().getBlockState(snail.getBlockPos().north()).isIn(BlockTags.AIR);
-        boolean var4 = !snail.getWorld().getBlockState(snail.getBlockPos().south()).isIn(BlockTags.AIR);
-        boolean var5 = !snail.getWorld().getBlockState(snail.getBlockPos().east()).isIn(BlockTags.AIR);
-        boolean var6 = !snail.getWorld().getBlockState(snail.getBlockPos().west()).isIn(BlockTags.AIR);
 
-        boolean allofem = var1 && var2 && var3 && var4 && var5 && var6;
-
-
-        if (allofem) {
-            teleport();
-        }
 
 
 

@@ -29,7 +29,7 @@ import java.util.function.Predicate;
 public class SnailEntity extends HostileEntity {
     public final AnimationState idleAnimationState = new AnimationState();
     private int idleAnimationTimeout = 0;
-
+    private boolean flying;
 
 
     @Override

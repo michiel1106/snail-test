@@ -81,14 +81,14 @@ public class PathCommand {
             // Log the current position being processed
             //System.out.println("Checking block at: " + pos);
 
-            if (world.getBlockState(pos).isAir() || world.getBlockState(pos).isReplaceable() || world.getBlockState(pos).isOf(Blocks.TALL_GRASS) || world.getBlockState(pos).isOf(Blocks.SHORT_GRASS) || world.getBlockState(pos).isOf(Blocks.CORNFLOWER) || world.getBlockState(pos).isOf(Blocks.DANDELION) || world.getBlockState(pos).isOf(Blocks.POPPY) || world.getBlockState(pos).isIn(BlockTags.LEAVES)) {
+            //if (world.getBlockState(pos).isAir() || world.getBlockState(pos).isReplaceable() || world.getBlockState(pos).isOf(Blocks.TALL_GRASS) || world.getBlockState(pos).isOf(Blocks.SHORT_GRASS) || world.getBlockState(pos).isOf(Blocks.CORNFLOWER) || world.getBlockState(pos).isOf(Blocks.DANDELION) || world.getBlockState(pos).isOf(Blocks.POPPY) || world.getBlockState(pos).isIn(BlockTags.LEAVES)) {
                 // If the block is air, place the block (example: emerald block)
                 world.setBlockState(pos, blocktype);
                 //System.out.println("Placed block at: " + pos);
-            } else {
+            //} else {
                 // Log if the block is not air, and we skip placing a block
-                System.out.println("Block at " + pos + " is not air, skipping.");
-            }
+                //System.out.println("Block at " + pos + " is not air, skipping.");
+            //}
         }
 
         // Log the completion of the block placement process

@@ -82,7 +82,7 @@ public class AStarPathFinder {
                         try {
                             if (closedSet.contains(neighbor)) continue;
 
-                            double tentativeGCost = gCostMap.get(current) + distance(current, neighbor);
+                            double tentativeGCost = gCostMap.get(current) + distance(current, neighbor, world);
                             if (!gCostMap.containsKey(neighbor) || tentativeGCost < gCostMap.get(neighbor)) {
                                 gCostMap.put(neighbor, tentativeGCost);
                                 neighbor.hCost = heuristic(neighbor, end);
@@ -122,47 +122,54 @@ public class AStarPathFinder {
             return Collections.emptyList();
         }
 
-        private static List<Node> getNeighbors(Node node, World world) {
-            List<Node> neighbors = new ArrayList<>();
-            int[][] directions = {
-                    {1, 0, 0}, {-1, 0, 0}, {0, 1, 0}, {0, -1, 0}, {0, 0, 1}, {0, 0, -1}
-            };
+    private static List<Node> getNeighbors(Node node, World world) {
+        List<Node> neighbors = new ArrayList<>();
+        int[][] directions = {
+                {1, 0, 0}, {-1, 0, 0}, {0, 1, 0}, {0, -1, 0}, {0, 0, 1}, {0, 0, -1}
+        };
 
-            for (int[] dir : directions) {
-                int nx = node.x + dir[0];
-                int ny = node.y + dir[1];
-                int nz = node.z + dir[2];
+        for (int[] dir : directions) {
+            int nx = node.x + dir[0];
+            int ny = node.y + dir[1];
+            int nz = node.z + dir[2];
 
-                BlockPos pos = new BlockPos(nx, ny, nz);
-                try {
-                    if (isWalkable(pos, world)) {
-                        neighbors.add(new Node(nx, ny, nz));
-                    } else {
-                        //System.out.println("Non-walkable position: (" + nx + ", " + ny + ", " + nz + ")");
-                    }
-                } catch (Exception e) {
-                    //System.err.println("A* Error determining walkability for position: (" + nx + ", " + ny + ", " + nz + ")");
-                    e.printStackTrace();
-                }
+            BlockPos pos = new BlockPos(nx, ny, nz);
+
+            // Allow air traversal while still considering ground paths
+            if (isWalkable(pos, world) || world.getBlockState(pos).isAir()) {
+                neighbors.add(new Node(nx, ny, nz));
             }
-            return neighbors;
         }
-        private static double heuristic(Node a, Node b) {
-            int dx = Math.abs(a.x - b.x); // Difference in x
-            int dz = Math.abs(a.z - b.z); // Difference in z
-            int dy = a.y - b.y; // Vertical difference (not absolute to differentiate up/down)
+        return neighbors;
+    }
+    private static double heuristic(Node a, Node b) {
+        int dx = Math.abs(a.x - b.x); // Horizontal distance in x
+        int dz = Math.abs(a.z - b.z); // Horizontal distance in z
+        int dy = a.y - b.y; // Vertical distance (can be negative or positive)
 
-            // Penalize upward movement (dy > 0), encourage downward (dy < 0)
-            double verticalPenalty = dy > 0 ? dy * 1 : dy * 1.5;
+        // Strongly prioritize horizontal movement
+        double horizontalCost = dx + dz;
 
-            return dx + dz + Math.abs(dy) + verticalPenalty;
+        // Penalize upward movement more heavily
+        double verticalPenalty = dy > 0 ? dy * 3 : dy * 0.5;
 
+        return horizontalCost + Math.abs(verticalPenalty);
+    }
 
-        }
+    private static double distance(Node a, Node b, World world) {
+        BlockPos pos = new BlockPos(b.x, b.y, b.z);
+        BlockState state = world.getBlockState(pos);
 
-        private static double distance(Node a, Node b) {
-            return 1.0;
-        }
+        double baseCost = 1.0;
+
+        if (b.y > a.y) baseCost += 0.3; // Slight penalty for upward movement
+        if (b.y < a.y) baseCost -= 0.1; // Reward for downward movement
+
+        if (state.isAir()) baseCost += 0.5; // Slight penalty for air movement
+        if (!   state.isIn(BlockTags.AIR)) baseCost += 12.8; // Higher cost for breaking through blocks
+
+        return baseCost;
+    }
 
         private static List<Node> reconstructPath(Map<Node, Node> cameFrom, Node current) {
             List<Node> path = new ArrayList<>();
@@ -179,14 +186,14 @@ public class AStarPathFinder {
             BlockPos twoBelow = below.down(); // Block two blocks below
 
             // Check if there is a solid block directly under or two blocks under
-            boolean hasSupport = isSolidBlock(below, world) || isSolidBlock(twoBelow, world);
+            //boolean hasSupport = isSolidBlock(below, world) || isSolidBlock(twoBelow, world);
 
             // Check if the position itself is walkable
             BlockState state = world.getBlockState(pos);
             boolean isEmptyOrPassable = state.isAir() || state.isReplaceable() || state.isOf(Blocks.TALL_GRASS) || state.isOf(Blocks.SHORT_GRASS) || state.isOf(Blocks.CORNFLOWER) || state.isOf(Blocks.DANDELION) || state.isOf(Blocks.POPPY) || state.isOf(Blocks.WATER) || state.isOf(Blocks.LAVA);
 
             // Node is walkable if it has support below and the position itself is passable
-            return hasSupport && isEmptyOrPassable;
+            return true;
         }
 
         private static boolean isSolidBlock(BlockPos pos, World world) {

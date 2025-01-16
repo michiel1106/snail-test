@@ -1,4 +1,4 @@
-plugins {
+	plugins {
 	id 'fabric-loom' version '1.8-SNAPSHOT'
 	id 'maven-publish'
 }
@@ -12,11 +12,10 @@ base {
 
 repositories {
 
-	//mavenCentral()
-	//maven {
-	//	name = 'babbaj-repo'
-	//	url = 'https://babbaj.github.io/maven/'
-	//}
+	maven {
+		name = "Ladysnake Mods"
+		url = 'https://maven.ladysnake.org/releases'
+	}
 }
 
 fabricApi {
@@ -31,9 +30,8 @@ dependencies {
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-	//modImplementation(files("libs/baritone-1.21.3.jar"))
-	//modImplementation "dev.babbaj:nether-pathfinder:${project.nether_pathfinder_version}"
-	modImplementation(files("libs/MC-AStar-Java-v1-1.jar"))
+
+
 }
 
 processResources {

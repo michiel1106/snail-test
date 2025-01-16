@@ -1,4 +1,4 @@
-{
+	{
 	"schemaVersion": 1,
 	"id": "snailz",
 	"version": "${version}",
@@ -36,5 +36,11 @@
 	},
 	"suggests": {
 		"another-mod": "*"
-	}
+	},
+		"custom": {
+			"cardinal-components": [
+				"snailz:snail"
+			]
+		}
+
 }
